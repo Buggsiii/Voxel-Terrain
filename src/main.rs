@@ -4,7 +4,9 @@ use bevy::{
     pbr::wireframe::{WireframeConfig, WireframePlugin},
     prelude::*,
 };
+use bevy_egui::{EguiContexts, EguiPlugin};
 
+mod single_mesh_terrain;
 mod unoptimized_terrain;
 
 fn main() {
@@ -14,6 +16,7 @@ fn main() {
             FrameTimeDiagnosticsPlugin,
             LogDiagnosticsPlugin::default(),
             WireframePlugin,
+            EguiPlugin,
         ))
         .insert_resource(WireframeConfig {
             global: true,
@@ -21,8 +24,10 @@ fn main() {
         })
         .add_systems(Startup, (setup, setup_camera))
         // Unoptimized terrain
-        .add_systems(Startup, unoptimized_terrain::setup)
-        .add_systems(Update, input_handler)
+        // .add_systems(Startup, unoptimized_terrain::setup)
+        // Single mesh terrain
+        .add_systems(Startup, single_mesh_terrain::setup)
+        .add_systems(Update, (input_handler, gui))
         .run();
 }
 
@@ -102,4 +107,10 @@ fn input_handler(
             transform.rotate_y(-rot_speed * delta_time);
         }
     }
+}
+
+fn gui(mut contexts: EguiContexts) {
+    egui::Window::new("Hello").show(contexts.ctx_mut(), |ui| {
+        ui.label("Hello World!");
+    });
 }

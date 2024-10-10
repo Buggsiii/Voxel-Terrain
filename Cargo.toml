@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.14.2"
+bevy_egui = "0.30.0"
+egui = "0.29.1"
 noise = "0.9.0"
 
 [profile.dev]

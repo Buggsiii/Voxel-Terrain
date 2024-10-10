@@ -29,9 +29,7 @@ pub fn setup(
                 commands.spawn(PbrBundle {
                     mesh: cube_mesh_handle,
                     material: materials.add(Color::srgba(0.3, 0.5, 0.3, 0.0)),
-                    transform: Transform::from_translation(Vec3::new(
-                        x as f32, -y as f32, z as f32,
-                    )),
+                    transform: Transform::from_translation(Vec3::new(x as f32, y as f32, z as f32)),
                     ..default()
                 });
             }
@@ -47,6 +45,7 @@ fn create_cube_mesh() -> Mesh {
     .with_inserted_attribute(
         Mesh::ATTRIBUTE_POSITION,
         vec![
+            // top      (+y)
             [0.0, 1.0, 0.0],
             [1.0, 1.0, 0.0],
             [1.0, 1.0, 1.0],
