@@ -4,34 +4,49 @@ use bevy::{
 };
 use noise::{NoiseFn, Perlin};
 
+const SIZE: i8 = 16;
+const SCALE: f64 = 0.1;
+
 pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let cube_terrain_handle: Handle<Mesh> = meshes.add(create_terrain_mesh());
-    commands.spawn(PbrBundle {
-        mesh: cube_terrain_handle,
-        material: materials.add(Color::srgba(0.3, 0.5, 0.3, 0.0)),
-        ..default()
-    });
+    for x in -4..4 {
+        for z in -4..4 {
+            let cube_terrain_handle: Handle<Mesh> =
+                meshes.add(create_terrain_mesh(x * SIZE, z * SIZE));
+            commands.spawn(PbrBundle {
+                mesh: cube_terrain_handle,
+                material: materials.add(Color::srgba(0.3, 0.5, 0.3, 1.0)),
+                transform: Transform::from_translation(Vec3::new(
+                    (x * SIZE) as f32,
+                    -SIZE as f32,
+                    (z * SIZE) as f32,
+                )),
+                ..default()
+            });
+        }
+    }
 }
 
-fn create_terrain_mesh() -> Mesh {
-    let size = 16;
+fn create_terrain_mesh(x_pos: i8, z_pos: i8) -> Mesh {
     let perlin = Perlin::new(0);
-    let scale = 0.2;
 
     let mut vertices = Vec::new();
     let mut normals = Vec::new();
     let mut indices = Vec::new();
 
-    for x in 0..size {
-        for y in 0..size {
-            for z in 0..size {
-                let val = perlin.get([x as f64 * scale, y as f64 * scale, z as f64 * scale]) as f32;
+    for x in 0..SIZE {
+        for y in 0..SIZE {
+            for z in 0..SIZE {
+                let val = perlin.get([
+                    (x_pos + x) as f64 * SCALE,
+                    y as f64 * SCALE,
+                    (z_pos + z) as f64 * SCALE,
+                ]) as f32;
 
-                if val < 0.2 {
+                if val < -0.2 {
                     continue;
                 }
 
