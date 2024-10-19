@@ -1,12 +1,17 @@
 use bevy::{
     color::palettes::css::WHITE,
-    pbr::wireframe::{WireframeConfig, WireframePlugin},
+    core_pipeline::experimental::taa::{TemporalAntiAliasBundle, TemporalAntiAliasPlugin},
+    pbr::{
+        wireframe::{WireframeConfig, WireframePlugin},
+        ScreenSpaceAmbientOcclusionBundle,
+    },
     prelude::*,
     window::{PresentMode, Window, WindowPlugin},
 };
 
 mod gui_plugin;
 use gui_plugin::GuiPlugin;
+mod culled_mesh_terrain;
 mod single_mesh_terrain;
 mod unoptimized_terrain;
 
@@ -25,6 +30,7 @@ fn main() {
             }),
             WireframePlugin,
             GuiPlugin,
+            TemporalAntiAliasPlugin,
         ))
         .insert_resource(WireframeConfig {
             global: false,
@@ -34,7 +40,9 @@ fn main() {
         // Unoptimized terrain
         // .add_systems(Startup, unoptimized_terrain::setup)
         // Single mesh terrain
-        .add_systems(Startup, single_mesh_terrain::setup)
+        // .add_systems(Startup, single_mesh_terrain::setup)
+        // Culled mesh terrain
+        .add_systems(Startup, culled_mesh_terrain::setup)
         .add_systems(Update, input_handler)
         .run();
 }
@@ -43,29 +51,45 @@ fn setup(mut commands: Commands) {
     commands.spawn(DirectionalLightBundle {
         transform: Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_4)),
         directional_light: DirectionalLight {
+            color: Color::WHITE,
+            illuminance: 10000.0,
             shadows_enabled: true,
             ..default()
         },
         ..default()
     });
+
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 500.0,
+    });
+
+    commands.insert_resource(Msaa::Off);
 }
 
 fn setup_camera(mut commands: Commands) {
-    commands.spawn((
-        Camera3dBundle {
-            // transform: Transform::from_xyz(-15.0, 5.0, -15.0).looking_at(Vec3::ZERO, Vec3::Y),
-            transform: Transform::from_xyz(0.0, 1.8, 0.0),
-            ..default()
-        },
-        // FogSettings {
-        //     color: Color::srgb(0.168627451, 0.17254902, 0.184313725),
-        //     falloff: FogFalloff::Linear {
-        //         start: 5.0,
-        //         end: 20.0,
-        //     },
-        //     ..default()
-        // },
-    ));
+    commands
+        .spawn((
+            Camera3dBundle {
+                camera: Camera {
+                    hdr: true,
+                    ..default()
+                },
+                // transform: Transform::from_xyz(-15.0, 5.0, -15.0).looking_at(Vec3::ZERO, Vec3::Y),
+                transform: Transform::from_xyz(0.0, 1.8, 0.0),
+                ..default()
+            },
+            FogSettings {
+                color: Color::srgb(0.168627451, 0.17254902, 0.184313725),
+                falloff: FogFalloff::Linear {
+                    start: 96.0,
+                    end: 128.0,
+                },
+                ..default()
+            },
+        ))
+        .insert(ScreenSpaceAmbientOcclusionBundle::default())
+        .insert(TemporalAntiAliasBundle::default());
 }
 
 fn input_handler(

@@ -6,16 +6,24 @@ pub struct GuiPlugin;
 
 impl Plugin for GuiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(EguiPlugin).add_systems(Update, show_window);
+        app.add_plugins(EguiPlugin)
+            .init_resource::<UiState>()
+            .add_systems(Update, show_window);
     }
+}
+
+#[derive(Default, Resource)]
+pub struct UiState {
+    enable_wireframe: bool,
+    enable_occlusion_culling: bool,
+    render_distance: u16,
 }
 
 fn show_window(
     mut contexts: EguiContexts,
     time: Res<Time>,
     mut frame_times: Local<VecDeque<f64>>,
-    mut enable_wireframe: Local<bool>,
-    mut enable_occlusion_culling: Local<bool>,
+    mut ui_state: ResMut<UiState>,
 ) {
     let fps = 1.0 / time.delta_seconds_f64();
     frame_times.push_back(fps);
@@ -52,7 +60,8 @@ fn show_window(
         ui.separator();
 
         ui.label("Settings:");
-        ui.checkbox(&mut enable_wireframe, "Wireframe");
-        ui.checkbox(&mut enable_occlusion_culling, "Occlusion Culling");
+        ui.checkbox(&mut ui_state.enable_wireframe, "Wireframe");
+        ui.checkbox(&mut ui_state.enable_occlusion_culling, "Occlusion Culling");
+        ui.add(egui::Slider::new(&mut ui_state.render_distance, 0..=32).text("Render Distance"));
     });
 }
