@@ -71,7 +71,6 @@ public class SingleMeshTerrain : Terrain
                     });
                 }
             }
-
         }
 
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;

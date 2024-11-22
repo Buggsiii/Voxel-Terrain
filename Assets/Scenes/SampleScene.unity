@@ -270,7 +270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 164316e9f0c13aa40a690c1248a2e360, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isEnabled: 0
+  _isEnabled: 1
 --- !u!114 &330585549
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -454,7 +454,7 @@ MonoBehaviour:
     Density: 0.7
     NoiseScale: 0.1
     ChunkSize: {x: 16, y: 16, z: 16}
-    ChunkCount: {x: 16, y: 1, z: 16}
+    ChunkCount: {x: 4, y: 4, z: 4}
   _material: {fileID: 2100000, guid: 019466160e4e2f7409f1e582431bf409, type: 2}
 --- !u!1 &891940112
 GameObject:

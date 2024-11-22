@@ -47,15 +47,31 @@ public class FrustumCulling : MonoBehaviour
             float distance = 0;
             if (IsInsideFrustum(chunkCenter, planes, ref distance))
                 chunk.gameObject.SetActive(true);
-            else chunk.gameObject.SetActive(distance < -_chunkRadius);
+            else
+            {
+                bool isTooFarFromPlane = Mathf.Abs(distance) > _chunkRadius;
+
+                Vector3 camPos = Cam.transform.position;
+                float sqrDistanceToCamera =
+                    (chunkCenter.x - camPos.x) * (chunkCenter.x - camPos.x) +
+                    (chunkCenter.y - camPos.y) * (chunkCenter.y - camPos.y) +
+                    (chunkCenter.z - camPos.z) * (chunkCenter.z - camPos.z);
+                bool isTooFar = sqrDistanceToCamera >
+                    (Cam.farClipPlane + _chunkRadius) * (Cam.farClipPlane + _chunkRadius);
+
+                Vector3 directionToChunk = chunkCenter - camPos;
+                bool isBehindCamera = Vector3.Dot(Cam.transform.forward, directionToChunk) < 0;
+
+                chunk.gameObject.SetActive(!isTooFar && !isBehindCamera && !isTooFarFromPlane);
+            }
         }
     }
 
     private bool IsInsideFrustum(Vector3 point, Plane[] planes, ref float distance)
     {
-        for (int i = 0; i < planes.Length; i++)
+        foreach (Plane plane in planes)
         {
-            float dis = DistancePointPlane(point, planes[i]);
+            float dis = DistancePointPlane(point, plane);
 
             if (dis < 0)
             {
@@ -159,7 +175,7 @@ public class FrustumCulling : MonoBehaviour
         transform.Rotate(0, deltaRotationY, 0, Space.Self);
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmos()
     {
         // Draw frustum
         Gizmos.color = Color.red;
